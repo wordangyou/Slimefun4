@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.setup;
 
 import com.xzavier0722.mc.plugin.slimefun4.autocrafter.CrafterSmartPort;
 import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.extragear.ExtraGearSetup;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -7955,6 +7956,8 @@ public final class SlimefunItemSetup {
                 .register(plugin);
 
         // @formatter:on
+
+        ExtraGearSetup.setup(plugin, itemGroups.weapons, itemGroups.armor);
     }
 
     @ParametersAreNonnullByDefault

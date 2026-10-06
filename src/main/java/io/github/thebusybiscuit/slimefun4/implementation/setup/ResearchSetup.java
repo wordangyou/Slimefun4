@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.setup;
 
+import io.github.thebusybiscuit.extragear.ExtraGearSetup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -951,6 +952,9 @@ public final class ResearchSetup {
                 SlimefunItems.RAINBOW_CHESTPLATE,
                 SlimefunItems.RAINBOW_LEGGINGS,
                 SlimefunItems.RAINBOW_BOOTS);
+
+        // Researches of the merged addon "ExtraGear"
+        ExtraGearSetup.setupResearches();
     }
 
     @ParametersAreNonnullByDefault
