@@ -12,12 +12,16 @@ import io.github.thebusybiscuit.slimefun4.implementation.listeners.NetworkListen
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Server;
 
@@ -47,6 +51,12 @@ public class NetworkManager {
      * if insertions come at a slight cost.
      */
     private final List<Network> networks = new CopyOnWriteArrayList<>();
+
+    /**
+     * Pending network locations inside chunks that have not been loaded yet.
+     * They are retried via {@link #onChunkLoad(Chunk)} once their chunk has been loaded.
+     */
+    private final Map<String, Set<Location>> pendingLocations = new ConcurrentHashMap<>();
 
     /**
      * This creates a new {@link NetworkManager} with the given capacity.
@@ -213,6 +223,49 @@ public class NetworkManager {
                             Level.SEVERE,
                             x,
                             () -> "An Exception was thrown while causing a networks update @ " + new BlockPosition(l));
+        }
+    }
+
+    /**
+     * Schedules a network location to be re-checked once its chunk has been loaded.
+     * <p>
+     * When a {@link Network} tries to classify a location inside a chunk that is not loaded
+     * yet, it cannot tell whether this location is a network node. The location is recorded
+     * here so that {@link #onChunkLoad(Chunk)} can retry it later on.
+     *
+     * @param l
+     *            The {@link Location} to retry later
+     */
+    public void addPendingLocation(@Nonnull Location l) {
+        var world = l.getWorld();
+
+        if (world == null || world.isChunkLoaded(l.getBlockX() >> 4, l.getBlockZ() >> 4)) {
+            // The chunk is loaded already, so the classification result is final
+            return;
+        }
+
+        pendingLocations
+                .computeIfAbsent(LocationUtils.getChunkKey(l), k -> ConcurrentHashMap.newKeySet())
+                .add(l.clone());
+    }
+
+    /**
+     * Re-processes all pending network locations of the given {@link Chunk}, e.g. after it
+     * has been loaded. This allows networks to (re)connect locations whose chunks were
+     * not available during a previous discovery pass.
+     *
+     * @param chunk
+     *            The {@link Chunk} that has been loaded
+     */
+    public void onChunkLoad(@Nonnull Chunk chunk) {
+        var locations = pendingLocations.remove(LocationUtils.getChunkKey(chunk));
+
+        if (locations == null) {
+            return;
+        }
+
+        for (Location l : locations) {
+            updateAllNetworks(l);
         }
     }
 }

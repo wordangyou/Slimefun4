@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkLoadEvent;
 
 /**
  * This {@link Listener} is responsible for all updates to a {@link Network}.
@@ -50,5 +51,12 @@ public class NetworkListener implements Listener {
         for (Block b : e.getAdditionalBlocks()) {
             manager.updateAllNetworks(b.getLocation());
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkLoad(ChunkLoadEvent e) {
+        // Retry pending network locations of this chunk, so networks are not lost
+        // when a discovery pass ran while the chunk was not loaded yet
+        manager.onChunkLoad(e.getChunk());
     }
 }

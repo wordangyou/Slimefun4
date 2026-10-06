@@ -6,10 +6,10 @@ import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.core.networks.NetworkManager;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.NetworkListener;
-import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.Validate;
@@ -38,7 +38,8 @@ public abstract class Network {
      */
     protected Location regulator;
 
-    private final Queue<Location> nodeQueue = new ArrayDeque<>();
+    // Must be thread-safe: markDirty can be called from the main thread while ticks poll this queue
+    private final Queue<Location> nodeQueue = new ConcurrentLinkedQueue<>();
     protected final Set<Location> connectedLocations = new HashSet<>();
     protected final Set<Location> regulatorNodes = new HashSet<>();
     protected final Set<Location> connectorNodes = new HashSet<>();
@@ -174,6 +175,12 @@ public abstract class Network {
             NetworkComponent currentAssignment = getCurrentClassification(l);
             NetworkComponent classification = classifyLocation(l);
 
+            if (classification == null && currentAssignment == null && !isChunkLoaded(l)) {
+                // This location is inside a chunk that is not loaded yet, so we cannot tell
+                // whether it is a network node. Ask the manager to retry it once the chunk is loaded.
+                manager.addPendingLocation(l);
+            }
+
             if (classification != currentAssignment) {
                 if (currentAssignment == NetworkComponent.REGULATOR
                         || currentAssignment == NetworkComponent.CONNECTOR) {
@@ -203,6 +210,11 @@ public abstract class Network {
                 break;
             }
         }
+    }
+
+    private boolean isChunkLoaded(@Nonnull Location l) {
+        var world = l.getWorld();
+        return world == null || world.isChunkLoaded(l.getBlockX() >> 4, l.getBlockZ() >> 4);
     }
 
     private void discoverNeighbors(@Nonnull Location l, double xDiff, double yDiff, double zDiff) {

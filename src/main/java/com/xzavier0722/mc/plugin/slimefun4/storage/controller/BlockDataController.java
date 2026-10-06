@@ -60,6 +60,10 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class BlockDataController extends ADataController {
     /**
+     * 方块数据加载失败后的最大自动重试次数
+     */
+    private static final int MAX_LOAD_RETRIES = 3;
+    /**
      * 延迟写数据任务队列
      */
     private final Map<LinkedKey, DelayedTask> delayedWriteTasks;
@@ -81,6 +85,10 @@ public class BlockDataController extends ADataController {
      * {@link ScopedLock}
      */
     private final ScopedLock lock;
+    /**
+     * 方块数据自动加载连续失败的计数（用于限次重试）
+     */
+    private final Map<String, Integer> loadRetryCounts;
     /**
      * 延时加载模式标志
      */
@@ -104,6 +112,7 @@ public class BlockDataController extends ADataController {
         loadedUniversalData = new ConcurrentHashMap<>();
         invSnapshots = new ConcurrentHashMap<>();
         lock = new ScopedLock();
+        loadRetryCounts = new ConcurrentHashMap<>();
     }
 
     /**
@@ -850,7 +859,7 @@ public class BlockDataController extends ADataController {
             chunkData.addBlockCacheInternal(blockData, false);
 
             if (sfItem.loadDataByDefault()) {
-                scheduleReadTask(() -> loadBlockData(blockData));
+                scheduleReadTask(() -> loadBlockDataResilient(blockData));
             }
         });
 
@@ -1020,6 +1029,47 @@ public class BlockDataController extends ADataController {
             throw new RuntimeException("Failed to load block data: " + blockData.getKey(), e);
         } finally {
             lock.unlock(key);
+        }
+    }
+
+    /**
+     * 加载方块数据，失败时自动延迟重试。
+     * <p>
+     * 避免数据库瞬时故障导致关键方块（如能源调节机、货运管理器）的数据加载失败后，
+     * ticker 永不启用、网络无法自行恢复的问题。
+     *
+     * @param blockData 待加载的方块数据
+     */
+    private void loadBlockDataResilient(SlimefunBlockData blockData) {
+        try {
+            loadBlockData(blockData);
+            loadRetryCounts.remove(blockData.getKey());
+        } catch (Exception | LinkageError e) {
+            int attempt = loadRetryCounts.merge(blockData.getKey(), 1, Integer::sum);
+
+            if (attempt > MAX_LOAD_RETRIES) {
+                loadRetryCounts.remove(blockData.getKey());
+                logger.log(Level.SEVERE, "方块数据加载连续失败，已停止自动重试: " + blockData.getKey(), e);
+                return;
+            }
+
+            logger.log(Level.WARNING, "方块数据加载失败（第 " + attempt + " 次），稍后自动重试: " + blockData.getKey(), e);
+
+            Bukkit.getScheduler()
+                    .runTaskLater(
+                            Slimefun.instance(),
+                            () -> {
+                                if (blockData.isPendingRemove()) {
+                                    return;
+                                }
+
+                                try {
+                                    scheduleReadTask(() -> loadBlockDataResilient(blockData));
+                                } catch (IllegalStateException ignored) {
+                                    // 控制器已销毁（如服务器关闭），放弃重试
+                                }
+                            },
+                            100L * attempt);
         }
     }
 
