@@ -10,6 +10,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrato
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.bakedlibs.dough.protection.ProtectionManager;
+import io.github.linoxgh.moretools.MoreToolsSetup;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.api.exceptions.TagMisconfigurationException;
@@ -393,6 +394,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         // 启动内嵌的粘液进度（SlimefunAdvancements）
         SFAdvancementsSetup.setup(this);
 
+        // 启动内嵌的更多工具（MoreTools）
+        MoreToolsSetup.setup(this);
+
         // Initiating various Stuff and all items with a slight delay (0ms after the Server finished
         // loading)
         runSync(
@@ -486,6 +490,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         SlimefunExtended.shutdown();
         YongleNuclearExplosionSetup.shutdown();
         SFAdvancementsSetup.shutdown();
+        MoreToolsSetup.shutdown();
         getSQLProfiler().shutdown();
 
         // Cancel all tasks from this plugin immediately

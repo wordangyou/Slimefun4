@@ -148,3 +148,6 @@ permissions:
   sfa.command.import:
     description: 允许使用 /sfa import 导入其他插件的默认进度
     default: op
+  moretools.items.crescent-hammer.rotation-whitelist-bypass:
+    description: 允许绕过更多工具-新月锤的方块旋转白名单
+    default: notop
