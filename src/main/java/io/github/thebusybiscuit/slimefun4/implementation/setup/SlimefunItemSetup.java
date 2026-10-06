@@ -208,6 +208,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import me.sfiguz7.extratools.ExtraToolsSetup;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -7957,6 +7958,7 @@ public final class SlimefunItemSetup {
         // @formatter:on
 
         ExtraGearSetup.setup(plugin, itemGroups.weapons, itemGroups.armor);
+        ExtraToolsSetup.setup(plugin, itemGroups.tools, itemGroups.electricity);
     }
 
     @ParametersAreNonnullByDefault

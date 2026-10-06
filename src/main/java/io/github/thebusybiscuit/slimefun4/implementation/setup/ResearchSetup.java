@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import javax.annotation.ParametersAreNonnullByDefault;
+import me.sfiguz7.extratools.ExtraToolsSetup;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
@@ -955,6 +956,9 @@ public final class ResearchSetup {
 
         // Researches of the merged addon "ExtraGear"
         ExtraGearSetup.setupResearches();
+
+        // Researches of the merged addon "ExtraTools"
+        ExtraToolsSetup.setupResearches();
     }
 
     @ParametersAreNonnullByDefault
