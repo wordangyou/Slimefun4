@@ -6,6 +6,8 @@ import io.github.thebusybiscuit.slimefun4.api.events.TalismanActivateEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -37,8 +39,15 @@ import org.bukkit.potion.PotionEffect;
 
 public class Talisman extends SlimefunItem {
 
-    protected static final ItemGroup TALISMANS_ITEMGROUP = new ItemGroup(
+    // 护身符父级大类：「护身符 (I 级)」与「末影护身符 (II 级)」收进其二级菜单
+    protected static final NestedItemGroup TALISMANS_PARENT_GROUP = new NestedItemGroup(
+            new NamespacedKey(Slimefun.instance(), "talismans_category"),
+            new CustomItemStack(SlimefunItems.COMMON_TALISMAN, "&7Talismans"),
+            2);
+
+    protected static final SubItemGroup TALISMANS_ITEMGROUP = new SubItemGroup(
             new NamespacedKey(Slimefun.instance(), "talismans"),
+            TALISMANS_PARENT_GROUP,
             new CustomItemStack(SlimefunItems.COMMON_TALISMAN, "&7Talismans - &aTier I"),
             2);
     private static final String WIKI_PAGE = "Talismans";

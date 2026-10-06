@@ -38,6 +38,22 @@ repositories {
     maven("https://nexus.neetgames.com/repository/maven-public")
     maven("https://repo.walshy.dev/public")
     maven("https://repo.codemc.io/repository/maven-public/")
+    maven("https://maven.elmakers.com/repository/")
+    maven("https://ci.nyaacat.com/maven/")
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "codeMcQuickShop"
+                url = uri("https://repo.codemc.io/repository/maven-public/")
+                metadataSources {
+                    artifact()
+                }
+            }
+        }
+        filter {
+            includeModule("org.maxgamer", "QuickShop")
+        }
+    }
 }
 
 dependencies {
@@ -73,6 +89,11 @@ dependencies {
     compileOnly(libs.orebfuscator.api) { exclude(group = "*", module = "*") }
     compileOnly(libs.vault.api) { exclude(group = "*", module = "*") }
     compileOnly(libs.authlib) { exclude(group = "*", module = "*") }
+    compileOnly(variantOf(libs.kingdoms) { classifier("all") }) { exclude(group = "*", module = "*") }
+    compileOnly(libs.magic.api) { exclude(group = "*", module = "*") }
+    compileOnly(libs.quickshop.api) { exclude(group = "*", module = "*") }
+    compileOnly(libs.quickshop.legacy) { exclude(group = "*", module = "*") }
+    compileOnly(libs.lockettepro) { exclude(group = "*", module = "*") }
 
     implementation(libs.commons.lang)
     implementation(libs.slimefun.comp.lib)

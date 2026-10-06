@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.api.items.groups;
 
 import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.guide.GuideHistory;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuide;
@@ -16,6 +17,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -108,11 +110,40 @@ public class NestedItemGroup extends FlexItemGroup {
                 continue;
             }
 
-            menu.addItem(index, itemGroup.getItem(p));
-            menu.addMenuClickHandler(index, (pl, slot, item, action) -> {
-                SlimefunGuide.openItemGroup(profile, itemGroup, mode, 1);
-                return false;
-            });
+            // 锁定子组：未解锁全部父组研究前显示为锁定屏障
+            if (itemGroup instanceof LockedSubItemGroup locked
+                    && mode == SlimefunGuideMode.SURVIVAL_MODE
+                    && !locked.hasUnlocked(p, profile)) {
+                List<String> lore = new ArrayList<>();
+                lore.add("");
+
+                for (String line : Slimefun.getLocalization().getMessages(p, "guide.locked-itemgroup")) {
+                    lore.add(ChatColor.WHITE + line);
+                }
+
+                lore.add("");
+
+                for (ItemGroup lockedParent : locked.getParents()) {
+                    lore.add(lockedParent.getItem(p).getItemMeta().getDisplayName());
+                }
+
+                menu.addItem(
+                        index,
+                        new CustomItemStack(
+                                Material.BARRIER,
+                                "&4"
+                                        + Slimefun.getLocalization().getMessage(p, "guide.locked")
+                                        + " &7- &f"
+                                        + itemGroup.getItem(p).getItemMeta().getDisplayName(),
+                                lore.toArray(new String[0])));
+                menu.addMenuClickHandler(index, ChestMenuUtils.getEmptyClickHandler());
+            } else {
+                menu.addItem(index, itemGroup.getItem(p));
+                menu.addMenuClickHandler(index, (pl, slot, item, action) -> {
+                    SlimefunGuide.openItemGroup(profile, itemGroup, mode, 1);
+                    return false;
+                });
+            }
 
             index++;
         }

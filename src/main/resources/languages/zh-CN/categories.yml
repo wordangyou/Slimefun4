@@ -18,6 +18,7 @@ slimefun:
   tech_misc: '科技零件'
   magical_armor: '魔法防具'
   talismans: '护身符 (I 级)'
+  talismans_category: '护身符'
   ender_talismans: '末影护身符 (II 级)'
   christmas: '圣诞节 (12 月)'
   valentines_day: '情人节 (2 月 14 日)'

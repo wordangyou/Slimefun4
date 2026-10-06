@@ -78,9 +78,9 @@ class EnvironmentChecker {
                 .runTaskLater(
                         sf,
                         () -> {
-                            if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
-                                sf.getLogger().log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
-                                sf.getLogger().log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
+                            if (Bukkit.getPluginManager().getPlugin("SlimeGlue") != null) {
+                                sf.getLogger().log(Level.WARNING, "检测到独立插件 SlimeGlue (粘液胶) 已安装!");
+                                sf.getLogger().log(Level.WARNING, "Slimefun 已内置该功能, 请移除独立的 SlimeGlue 插件以避免重复的保护检查.");
                             }
                         },
                         300); // 15s

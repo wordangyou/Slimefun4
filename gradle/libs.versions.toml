@@ -36,6 +36,11 @@ commons-lang = { module = "commons-lang:commons-lang", version = "2.6" }
 slimefun-comp-lib = { module = "com.github.Xzavier0722:SlimefunCompLib", version = "b7a2bd8" }
 guizhanlib-updater = { module = "net.guizhanss:guizhanlib-updater", version = "2.5.0" }
 guizhanlib-minecraft = { module = "net.guizhanss:guizhanlib-minecraft", version = "2.5.0" }
+kingdoms = { module = "com.github.cryptomorin:kingdoms", version = "1.16.20.5" }
+magic-api = { module = "com.elmakers.mine.bukkit:MagicAPI", version = "10.2" }
+quickshop-api = { module = "com.ghostchu:quickshop-api", version = "6.2.0.11" }
+quickshop-legacy = { module = "org.maxgamer:QuickShop", version = "5.1.2.5" }
+lockettepro = { module = "me.crafter.mc:lockettepro", version = "2.16" }
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

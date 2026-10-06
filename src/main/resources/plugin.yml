@@ -23,11 +23,13 @@ softdepend:
   - Residence
   - Vault
   - Orebfuscator
+  - Sanity
+  - FluffyMachines
+  - PlayerBackpack
 
 # We hook into these plugins too, but they depend on Slimefun.
 loadBefore:
   - ChestTerminal
-  - SlimeGlue
 
 # Our commands
 commands:
@@ -39,6 +41,15 @@ commands:
     description: 撤回最近一次核爆
     usage: /ynundo [次数]
     permission: yonglenuclearexplosion.undo
+  exotic:
+    description: 异域花园主命令
+    usage: /exotic [version|debug ...]
+  spawn:
+    description: 传送回出生点
+    usage: /spawn
+  setspawn:
+    description: 设置服务器出生点
+    usage: /setspawn
   sfadvancements:
     description: 粘液进度主命令
     usage: /sfadvancements <save|reload|grant|revoke|gui|dumpitem|import>
@@ -126,6 +137,15 @@ permissions:
     default: op
   yonglenuclearexplosion.undo:
     description: Allows you to do /ynundo
+    default: op
+  spawn.admin:
+    description: 允许使用 /setspawn 设置出生点
+    default: op
+  spawn.spawn:
+    description: 允许使用 /spawn 传送回出生点
+    default: op
+  exoticgarden.admin:
+    description: 允许使用异域花园调试命令
     default: op
   sfa.command.save:
     description: 允许使用 /sfa save 保存进度到磁盘

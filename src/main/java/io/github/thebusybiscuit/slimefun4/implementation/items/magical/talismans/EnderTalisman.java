@@ -2,7 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.magical.talisman
 
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.thebusybiscuit.slimefun4.api.items.groups.LockedItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.LockedSubItemGroup;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -19,11 +19,12 @@ import org.bukkit.inventory.ItemStack;
  */
 class EnderTalisman extends Talisman {
 
-    private static final LockedItemGroup ENDER_TALISMANS_ITEMGROUP = new LockedItemGroup(
+    private static final LockedSubItemGroup ENDER_TALISMANS_ITEMGROUP = new LockedSubItemGroup(
             new NamespacedKey(Slimefun.instance(), "ender_talismans"),
+            Talisman.TALISMANS_PARENT_GROUP,
             new CustomItemStack(SlimefunItems.ENDER_TALISMAN, "&7Talismans - &aTier II"),
             3,
-            Talisman.TALISMANS_ITEMGROUP.getKey());
+            Talisman.TALISMANS_ITEMGROUP);
 
     @ParametersAreNonnullByDefault
     public EnderTalisman(Talisman parent, SlimefunItemStack item) {

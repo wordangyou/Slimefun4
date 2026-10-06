@@ -8,9 +8,11 @@ import com.xzavier0722.mc.plugin.slimefun4.chat.PlayerChatCatcher;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.BlockStorageMigrator;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrator;
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
+import com.xzavier0722.mc.plugin.slimeglue.SlimeGlue;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.bakedlibs.dough.protection.ProtectionManager;
 import io.github.linoxgh.moretools.MoreToolsSetup;
+import io.github.thebusybiscuit.exoticgarden.ExoticGarden;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.api.exceptions.TagMisconfigurationException;
@@ -391,6 +393,12 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         // 启动核爆系统
         YongleNuclearExplosionSetup.setup(this);
 
+        // 启动内嵌的粘液胶（SlimeGlue）兼容层
+        SlimeGlue.setup(this);
+
+        // 启动内嵌的异域花园（ExoticGarden）
+        ExoticGarden.setup(this);
+
         // 启动内嵌的粘液进度（SlimefunAdvancements）
         SFAdvancementsSetup.setup(this);
 
@@ -491,6 +499,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         YongleNuclearExplosionSetup.shutdown();
         SFAdvancementsSetup.shutdown();
         MoreToolsSetup.shutdown();
+        ExoticGarden.cleanup();
         getSQLProfiler().shutdown();
 
         // Cancel all tasks from this plugin immediately
