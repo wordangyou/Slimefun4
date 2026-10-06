@@ -39,6 +39,10 @@ commands:
     description: 撤回最近一次核爆
     usage: /ynundo [次数]
     permission: yonglenuclearexplosion.undo
+  sfadvancements:
+    description: 粘液进度主命令
+    usage: /sfadvancements <save|reload|grant|revoke|gui|dumpitem|import>
+    aliases: [sfa]
 
 # Default permissions
 permissions:
@@ -122,4 +126,25 @@ permissions:
     default: op
   yonglenuclearexplosion.undo:
     description: Allows you to do /ynundo
+    default: op
+  sfa.command.save:
+    description: 允许使用 /sfa save 保存进度到磁盘
+    default: op
+  sfa.command.revoke:
+    description: 允许使用 /sfa revoke 撤销玩家的进度
+    default: op
+  sfa.command.grant:
+    description: 允许使用 /sfa grant 授予玩家进度
+    default: op
+  sfa.command.gui:
+    description: 允许使用 /sfa gui 打开进度界面
+    default: true
+  sfa.command.dumpitem:
+    description: 允许使用 /sfa dumpitem 导出物品的配置表示
+    default: op
+  sfa.command.reload:
+    description: 允许使用 /sfa reload 重载进度配置
+    default: op
+  sfa.command.import:
+    description: 允许使用 /sfa import 导入其他插件的默认进度
     default: op

@@ -125,6 +125,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import me.char321.sfadvancements.SFAdvancementsSetup;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuListener;
 import net.guizhanss.slimefun4.updater.AutoUpdateTask;
 import org.apache.commons.lang.Validate;
@@ -389,6 +390,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         // 启动核爆系统
         YongleNuclearExplosionSetup.setup(this);
 
+        // 启动内嵌的粘液进度（SlimefunAdvancements）
+        SFAdvancementsSetup.setup(this);
+
         // Initiating various Stuff and all items with a slight delay (0ms after the Server finished
         // loading)
         runSync(
@@ -481,6 +485,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
         SlimefunExtended.shutdown();
         YongleNuclearExplosionSetup.shutdown();
+        SFAdvancementsSetup.shutdown();
         getSQLProfiler().shutdown();
 
         // Cancel all tasks from this plugin immediately
