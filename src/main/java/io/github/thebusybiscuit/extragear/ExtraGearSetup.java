@@ -344,7 +344,7 @@ public final class ExtraGearSetup {
 
     /**
      * This method registers all researches of "ExtraGear".
-     * It has to be called after {@link #setup(Slimefun, ItemGroup, ItemGroup)}.
+     * It has to be called after {@link #setup(Slimefun)}.
      */
     public static void setupResearches() {
         for (Research research : researches) {
