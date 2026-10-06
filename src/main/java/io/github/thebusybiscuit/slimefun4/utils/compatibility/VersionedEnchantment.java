@@ -17,6 +17,9 @@ public class VersionedEnchantment {
     public static final Enchantment LUCK_OF_THE_SEA;
     public static final Enchantment AQUA_AFFINITY;
     public static final Enchantment FORTUNE;
+    public static final Enchantment SMITE;
+    public static final Enchantment BANE_OF_ARTHROPODS;
+    public static final Enchantment BLAST_PROTECTION;
 
     static {
         MinecraftVersion version = Slimefun.getMinecraftVersion();
@@ -50,6 +53,19 @@ public class VersionedEnchantment {
         FORTUNE = version.isAtLeast(MinecraftVersion.MINECRAFT_1_20_5)
                 ? Enchantment.FORTUNE
                 : getKey("LOOT_BONUS_BLOCKS");
+
+        // DAMAGE_UNDEAD is renamed to SMITE in 1.20.5
+        SMITE = version.isAtLeast(MinecraftVersion.MINECRAFT_1_20_5) ? Enchantment.SMITE : getKey("DAMAGE_UNDEAD");
+
+        // DAMAGE_ARTHROPODS is renamed to BANE_OF_ARTHROPODS in 1.20.5
+        BANE_OF_ARTHROPODS = version.isAtLeast(MinecraftVersion.MINECRAFT_1_20_5)
+                ? Enchantment.BANE_OF_ARTHROPODS
+                : getKey("DAMAGE_ARTHROPODS");
+
+        // PROTECTION_EXPLOSIONS is renamed to BLAST_PROTECTION in 1.20.5
+        BLAST_PROTECTION = version.isAtLeast(MinecraftVersion.MINECRAFT_1_20_5)
+                ? Enchantment.BLAST_PROTECTION
+                : getKey("PROTECTION_EXPLOSIONS");
     }
 
     @Nullable private static Enchantment getKey(@Nonnull String key) {

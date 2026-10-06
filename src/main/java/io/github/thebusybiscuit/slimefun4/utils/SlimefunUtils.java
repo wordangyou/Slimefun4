@@ -47,6 +47,8 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 
 /**
  * This utility class holds method that are directly linked to Slimefun.
@@ -470,6 +472,7 @@ public final class SlimefunUtils {
         return equalsItemMeta(itemMeta, sfitemMeta, checkLore, true);
     }
 
+    @SuppressWarnings({"deprecation", "removal"})
     private static boolean equalsItemMeta(
             @Nonnull ItemMeta itemMeta,
             @Nonnull ItemMeta sfitemMeta,
@@ -530,6 +533,25 @@ public final class SlimefunUtils {
         Debug.log(TestCase.CARGO_INPUT_TESTING, "  All meta checked.");
 
         return true;
+    }
+
+    /**
+     * This method applies the given {@link PotionType} as base potion type of the given
+     * {@link PotionMeta}. The modern method used by this implementation only exists on
+     * Minecraft 1.20.2 and above, older servers fall back to the deprecated API.
+     *
+     * @param meta
+     *            The {@link PotionMeta} to modify
+     * @param type
+     *            The {@link PotionType} to apply
+     */
+    @SuppressWarnings({"deprecation", "removal"})
+    public static void setBasePotionType(@Nonnull PotionMeta meta, @Nonnull PotionType type) {
+        if (SlimefunExtended.isAtLeast(1, 20, 2)) {
+            meta.setBasePotionType(type);
+        } else {
+            meta.setBasePotionData(new PotionData(type, false, false));
+        }
     }
 
     /**
