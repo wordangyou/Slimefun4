@@ -1025,10 +1025,16 @@ public class BlockDataController extends ADataController {
 
     public void loadDataAsync(ASlimefunDataContainer container, IAsyncReadCallback<ASlimefunDataContainer> callback) {
         scheduleReadTask(() -> {
-            if (container instanceof SlimefunBlockData blockData) {
-                loadBlockData(blockData);
-            } else if (container instanceof SlimefunUniversalData uniData) {
-                loadUniversalData(uniData);
+            try {
+                if (container instanceof SlimefunBlockData blockData) {
+                    loadBlockData(blockData);
+                } else if (container instanceof SlimefunUniversalData uniData) {
+                    loadUniversalData(uniData);
+                }
+            } catch (Exception | LinkageError e) {
+                Slimefun.logger().log(Level.SEVERE, "Failed to load data: " + container.getKey(), e);
+                invokeCallback(callback, null);
+                return;
             }
 
             invokeCallback(callback, container);
@@ -1037,15 +1043,31 @@ public class BlockDataController extends ADataController {
 
     public void loadBlockDataAsync(SlimefunBlockData blockData, IAsyncReadCallback<SlimefunBlockData> callback) {
         scheduleReadTask(() -> {
-            loadBlockData(blockData);
+            try {
+                loadBlockData(blockData);
+            } catch (Exception | LinkageError e) {
+                Slimefun.logger().log(Level.SEVERE, "Failed to load block data: " + blockData.getKey(), e);
+                invokeCallback(callback, null);
+                return;
+            }
+
             invokeCallback(callback, blockData);
         });
     }
 
     public void loadBlockDataAsync(
             List<SlimefunBlockData> blockDataList, IAsyncReadCallback<List<SlimefunBlockData>> callback) {
-        scheduleReadTask(() -> blockDataList.forEach(this::loadBlockData));
-        invokeCallback(callback, blockDataList);
+        scheduleReadTask(() -> {
+            try {
+                blockDataList.forEach(this::loadBlockData);
+            } catch (Exception | LinkageError e) {
+                Slimefun.logger().log(Level.SEVERE, "Failed to load block data list (" + blockDataList.size() + ")", e);
+                invokeCallback(callback, null);
+                return;
+            }
+
+            invokeCallback(callback, blockDataList);
+        });
     }
 
     @ParametersAreNonnullByDefault
@@ -1138,7 +1160,14 @@ public class BlockDataController extends ADataController {
     public void loadUniversalDataAsync(
             SlimefunUniversalData uniData, IAsyncReadCallback<SlimefunUniversalData> callback) {
         scheduleReadTask(() -> {
-            loadUniversalData(uniData);
+            try {
+                loadUniversalData(uniData);
+            } catch (Exception | LinkageError e) {
+                Slimefun.logger().log(Level.SEVERE, "Failed to load universal data: " + uniData.getKey(), e);
+                invokeCallback(callback, null);
+                return;
+            }
+
             invokeCallback(callback, uniData);
         });
     }

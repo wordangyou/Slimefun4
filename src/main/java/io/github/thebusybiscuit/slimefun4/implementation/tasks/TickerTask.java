@@ -164,14 +164,10 @@ public class TickerTask implements Runnable {
 
             // Run our ticker code
             if (!halted) {
-                Set<Map.Entry<ChunkPosition, Set<TickLocation>>> loc;
-
-                synchronized (tickingLocations) {
-                    loc = new HashSet<>(tickingLocations.entrySet());
-                }
-
-                for (Map.Entry<ChunkPosition, Set<TickLocation>> entry : loc) {
-                    tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
+                // Both the map and its value sets are thread-safe, so we iterate them directly
+                // instead of copying. Their iterators are weakly consistent, which is fine here.
+                for (Map.Entry<ChunkPosition, Set<TickLocation>> entry : tickingLocations.entrySet()) {
+                    tickChunk(entry.getKey(), tickers, entry.getValue());
                 }
             }
 
@@ -589,6 +585,9 @@ public class TickerTask implements Runnable {
 
         synchronized (tickingLocations) {
             tickingLocations.values().forEach(loc -> loc.removeIf(tk -> uuid.equals(tk.getUuid())));
+
+            // Drop chunk entries that no longer hold any tick location
+            tickingLocations.values().removeIf(Set::isEmpty);
         }
     }
 
