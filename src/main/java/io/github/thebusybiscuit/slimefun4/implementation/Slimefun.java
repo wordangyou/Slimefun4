@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.slimefun4.implementation;
 import city.norain.slimefun4.ServerVersion;
 import city.norain.slimefun4.SlimefunExtended;
 import city.norain.slimefun4.timings.SQLProfiler;
+import com.wordangyou.yonglenuclearexplosion.YongleNuclearExplosionSetup;
 import com.xzavier0722.mc.plugin.slimefun4.chat.PlayerChatCatcher;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.BlockStorageMigrator;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrator;
@@ -385,6 +386,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
         registerListeners();
 
+        // 启动核爆系统
+        YongleNuclearExplosionSetup.setup(this);
+
         // Initiating various Stuff and all items with a slight delay (0ms after the Server finished
         // loading)
         runSync(
@@ -476,6 +480,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         }
 
         SlimefunExtended.shutdown();
+        YongleNuclearExplosionSetup.shutdown();
         getSQLProfiler().shutdown();
 
         // Cancel all tasks from this plugin immediately

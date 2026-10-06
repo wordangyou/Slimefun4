@@ -64,6 +64,8 @@ dependencies {
 
     compileOnly(libs.worldedit.core) { exclude(group = "*", module = "*") }
     compileOnly(libs.worldedit.bukkit) { exclude(group = "*", module = "*") }
+    compileOnly(libs.plotsquared.core) { exclude(group = "*", module = "*") }
+    compileOnly(libs.plotsquared.bukkit) { exclude(group = "*", module = "*") }
     compileOnly(libs.mcmmo) { exclude(group = "*", module = "*") }
     compileOnly(libs.placeholderapi) { exclude(group = "*", module = "*") }
     compileOnly(libs.clearlag.core) { exclude(group = "*", module = "*") }

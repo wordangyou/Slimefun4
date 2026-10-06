@@ -15,9 +15,12 @@ api-version: '1.16'
 softdepend:
   - PlaceholderAPI
   - WorldEdit
+  - FastAsyncWorldEdit
   - ClearLag
   - mcMMO
   - ItemsAdder
+  - PlotSquared
+  - Residence
   - Vault
   - Orebfuscator
 
@@ -32,6 +35,10 @@ commands:
     description: basic Slimefun command
     aliases: sf
     usage: 'The Slimefun version you have installed does not seem to be compatible with your server setup. Check your console for more detailed info.'
+  ynundo:
+    description: 撤回最近一次核爆
+    usage: /ynundo [次数]
+    permission: yonglenuclearexplosion.undo
 
 # Default permissions
 permissions:
@@ -112,4 +119,7 @@ permissions:
     default: op
   slimefun.command.tick:
     description: Allows you to do /sf tick
+    default: op
+  yonglenuclearexplosion.undo:
+    description: Allows you to do /ynundo
     default: op
