@@ -42,16 +42,18 @@ public class StorageCacheUtils {
 
     @ParametersAreNonnullByDefault
     public static boolean hasUniversalBlock(Location l) {
+        // Fast path: universal data is only stored on tile entities,
+        // so ordinary blocks can skip the O(n) cache scan entirely
+        var block = l.getBlock();
+        if (!Slimefun.getBlockDataService().isTileEntity(block.getType())) {
+            return false;
+        }
+
         if (Slimefun.getDatabaseManager()
                 .getBlockDataController()
                 .getUniversalBlockDataFromCache(l)
                 .isPresent()) {
             return true;
-        }
-
-        var block = l.getBlock();
-        if (!Slimefun.getBlockDataService().isTileEntity(block.getType())) {
-            return false;
         }
 
         return TaskUtil.runSyncMethod(
@@ -283,20 +285,20 @@ public class StorageCacheUtils {
             return;
         }
 
-        if (loadingData.contains(data)) {
+        // Atomic guard: reject the request if a load is already pending for this container
+        if (!loadingData.add(data)) {
             return;
-        }
-
-        synchronized (loadingData) {
-            if (loadingData.contains(data)) {
-                return;
-            }
-            loadingData.add(data);
         }
 
         Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(data, new IAsyncReadCallback<>() {
             @Override
             public void onResult(SlimefunBlockData result) {
+                loadingData.remove(data);
+            }
+
+            @Override
+            public void onResultNotFound() {
+                // The load has failed, release the guard so a retry is possible
                 loadingData.remove(data);
             }
         });
@@ -307,20 +309,20 @@ public class StorageCacheUtils {
             return;
         }
 
-        if (loadingData.contains(data)) {
+        // Atomic guard: reject the request if a load is already pending for this container
+        if (!loadingData.add(data)) {
             return;
-        }
-
-        synchronized (loadingData) {
-            if (loadingData.contains(data)) {
-                return;
-            }
-            loadingData.add(data);
         }
 
         Slimefun.getDatabaseManager().getBlockDataController().loadUniversalDataAsync(data, new IAsyncReadCallback<>() {
             @Override
             public void onResult(SlimefunUniversalData result) {
+                loadingData.remove(data);
+            }
+
+            @Override
+            public void onResultNotFound() {
+                // The load has failed, release the guard so a retry is possible
                 loadingData.remove(data);
             }
         });
