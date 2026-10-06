@@ -1,17 +1,12 @@
 package com.wordangyou.yonglenuclearexplosion;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.world.block.BlockTypes;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Bukkit;
@@ -59,14 +54,15 @@ public final class NuclearExplosion {
     /**
      * 执行核爆
      *
-     * 当前版本使用普通 WorldEdit EditSession。
+     * 如果服务器安装 WorldEdit，
+     * 使用普通 WorldEdit EditSession 批量删除方块；
+     *
+     * 如果服务器未安装 WorldEdit，
+     * 自动降级为逐个方块删除。
      *
      * 注意：
      * 如果服务器同时安装 FAWE，
      * WorldEdit 的 EditSession 仍可能被 FAWE 接管。
-     *
-     * 本次测试必须暂时停用/移除 FAWE，
-     * 确保真正走普通 WorldEdit。
      */
     public void explode(Location center, UUID reactorOwner) {
 
@@ -110,7 +106,7 @@ public final class NuclearExplosion {
          */
         List<NuclearDrop> drops = new ArrayList<>();
 
-        Set<BlockVector3> destroyBlocks = new HashSet<>();
+        List<int[]> destroyBlocks = new ArrayList<>();
 
         /*
          * 核爆快照。
@@ -201,7 +197,7 @@ public final class NuclearExplosion {
 
                     if (breakBlocks) {
 
-                        destroyBlocks.add(BlockVector3.at(block.getX(), block.getY(), block.getZ()));
+                        destroyBlocks.add(new int[] {block.getX(), block.getY(), block.getZ()});
 
                         destroyedBlocks++;
                     }
@@ -225,12 +221,27 @@ public final class NuclearExplosion {
                         + " 个方块。");
 
         // ====================================================
-        // 使用普通 WorldEdit 删除方块
+        // 删除方块
+        //
+        // 优先使用 WorldEdit 批量删除，
+        // 未安装 WorldEdit 时降级为逐个方块删除。
         // ====================================================
 
         if (breakBlocks && !destroyBlocks.isEmpty()) {
 
-            boolean success = executeWorldEdit(world, destroyBlocks);
+            boolean success = false;
+
+            if (isWorldEditAvailable()) {
+
+                success = executeWorldEdit(world, destroyBlocks);
+            }
+
+            if (!success) {
+
+                plugin.getLogger().info("未使用 WorldEdit，普通方式删除 " + destroyBlocks.size() + " 个方块。");
+
+                success = deleteBlocksWithoutWorldEdit(world, destroyBlocks);
+            }
 
             if (success) {
 
@@ -722,35 +733,17 @@ public final class NuclearExplosion {
     // 普通 WorldEdit
     // ========================================================
 
-    private boolean executeWorldEdit(World world, Set<BlockVector3> blocks) {
+    private boolean executeWorldEdit(World world, List<int[]> blocks) {
 
         if (blocks.isEmpty()) {
             return false;
         }
 
-        EditSession editSession = null;
-
         try {
-
-            com.sk89q.worldedit.world.World editWorld = BukkitAdapter.adapt(world);
 
             plugin.getLogger().info("WorldEdit 核爆删除开始：" + blocks.size() + " 个方块");
 
-            editSession = WorldEdit.getInstance().newEditSession(editWorld);
-
-            /*
-             * WorldEdit 7.3.16 中：
-             *
-             * setBlocks(Set<BlockVector3>, Pattern)
-             *
-             * 不是公开 API。
-             *
-             * 因此这里逐个使用公开的 setBlock()。
-             */
-            for (BlockVector3 pos : blocks) {
-
-                editSession.setBlock(pos, BlockTypes.AIR.getDefaultState());
-            }
+            NuclearWorldEditBridge.deleteBlocks(world, blocks);
 
             plugin.getLogger().info("WorldEdit 核爆方块写入完成。");
 
@@ -763,24 +756,82 @@ public final class NuclearExplosion {
             throwable.printStackTrace();
 
             return false;
+        }
+    }
 
-        } finally {
+    // ========================================================
+    // WorldEdit 可用性检测
+    //
+    // 仅通过类名探测，
+    // 不直接引用 WorldEdit 类型，
+    // 避免未安装 WorldEdit 时类加载失败。
+    // ========================================================
 
-            if (editSession != null) {
+    private static boolean worldEditChecked = false;
 
-                try {
+    private static boolean worldEditAvailable = false;
 
-                    editSession.close();
+    private static synchronized boolean isWorldEditAvailable() {
 
-                    plugin.getLogger().info("WorldEdit EditSession 已关闭。");
+        if (!worldEditChecked) {
 
-                } catch (Throwable throwable) {
+            worldEditChecked = true;
 
-                    plugin.getLogger().warning("关闭 WorldEdit EditSession 时发生异常：" + throwable.getMessage());
+            try {
 
-                    throwable.printStackTrace();
+                Class.forName("com.sk89q.worldedit.WorldEdit");
+
+                worldEditAvailable = true;
+
+            } catch (Throwable ignored) {
+
+                worldEditAvailable = false;
+            }
+        }
+
+        return worldEditAvailable;
+    }
+
+    // ========================================================
+    // 未安装 WorldEdit 时的降级删除
+    // ========================================================
+
+    private boolean deleteBlocksWithoutWorldEdit(World world, List<int[]> blocks) {
+
+        try {
+
+            for (int[] pos : blocks) {
+
+                Block block = world.getBlockAt(pos[0], pos[1], pos[2]);
+
+                /*
+                 * 清理 Slimefun 方块数据
+                 *
+                 * 与 WorldEdit 路径下
+                 * WorldEditIntegration 的自动清理保持一致。
+                 */
+                Location location = new Location(world, pos[0], pos[1], pos[2]);
+
+                if (StorageCacheUtils.hasSlimefunBlock(location)) {
+
+                    Slimefun.getDatabaseManager().getBlockDataController().removeBlock(location);
+                }
+
+                if (!block.getType().isAir()) {
+
+                    block.setType(Material.AIR, false);
                 }
             }
+
+            return true;
+
+        } catch (Throwable throwable) {
+
+            plugin.getLogger().warning("核爆方块删除失败：" + throwable.getMessage());
+
+            throwable.printStackTrace();
+
+            return false;
         }
     }
 
